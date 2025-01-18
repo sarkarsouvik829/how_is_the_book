@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How is the Book?</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body {
+            background: rgba(0, 0, 0, 0.4) url('static/background.jpg') no-repeat center center fixed;
+            background-size: cover;
+            background-blend-mode: overlay;
+            color: #fff; /* Set default text color to white for readability */
+        }
+
+        .container {
+            margin-top: 50px;
+        }
+
+        h1 {
+            color: white; /* Set the header text color to white */
+        }
+        h3 {
+            color: black;
+        }
+        p {
+            color: black;
+        }
+        .result {
+            margin-top: 30px;
+            background-color: white; /* Set a white background for the result box */
+            padding: 20px;
+            border-radius: 8px; /* Rounded corners */
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Subtle shadow for a nice effect */
+            color: black;
+        }
+
+        .sentiment-summary {
+            margin-top: 20px;
+        }
+
+        .sentiment-summary h5 {
+            font-weight: bold;
+            color: black;
+        }
+
+        .sentiment-summary ul {
+            padding-left: 20px;
+        }
+
+        .sentiment-summary li {
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="text-center">How is the Book?</h1>
+        <form id="book-form">
+            <div class="form-group">
+                <label for="book_name">Enter Book Name:</label>
+                <input type="text" class="form-control" id="book_name" name="book_name" placeholder="Enter book name" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Get Readers' Sentiment</button>
+        </form>
+
+        <div id="loading-message" class="loading" style="display:none;">
+            AI bots in action...
+        </div>
+
+        <div id="result" class="result">
+            <!-- Results will be displayed here -->
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $('#book-form').submit(function(event) {
+                event.preventDefault();
+                
+                var bookName = $('#book_name').val().trim();
+                if (bookName) {
+                    // Show loading message
+                    $('#loading-message').show();
+                    $('#result').empty();
+                    $.get('/book_summary', { book_name: bookName }, function(response) {
+                        $('#loading-message').hide();
+                        if (response.error) {
+                            $('#result').html('<div class="alert alert-danger">' + response.error + '</div>');
+                        } else {
+                            var sentimentSummary = response.sentiment_analysis_summary;
+                            var sentimentPoints = sentimentSummary.split('\n');
+                            var sentimentHtml = '<h4>Sentiment Analysis:</h4><div class="sentiment-summary"><h5>Overall Sentiment:</h5><p>' + sentimentPoints[0] + '</p><h5>Key Points from the reviews:</h5><ul>';
+                            
+                            for (var i = 1; i < sentimentPoints.length; i++) {
+                                if (sentimentPoints[i].trim() !== "") {
+                                    sentimentHtml += '<li>' + sentimentPoints[i].trim() + '</li>';
+                                    
+                                }
+                            }
+
+                            sentimentHtml += '</ul></div>';
+                            
+                            $('#result').html(`
+                                <h3>Is this your book?</h3>
+                                <p><strong>Title:</strong> ${response.book_title}</p>
+                                <p><strong>Author:</strong> ${response.author_name}</p>
+                                <p><strong>Language:</strong> ${response.language}</p>
+                                <p><strong>Total Pages:</strong> ${response.num_pages}</p>
+                                <p><strong>Total Reviews:</strong> ${response.total_reviews}</p>
+                                <p><strong>Average Rating:</strong> ${response.average_rating}</p>
+                                <p><strong>Goodreads Link:</strong> <a href="${response.goodreads_link}" target="_blank">${response.goodreads_link}</a></p>
+                                <p><strong>Amazon Link:</strong> <a href="${response.amazon_link}" target="_blank">${response.amazon_link}</a></p>
+                                ${sentimentHtml}
+                            `);
+                        }
+                    }).fail(function() {
+                        $('#result').html('<div class="alert alert-danger">An error occurred. Please try again.</div>');
+                    });
+                } else {
+                    $('#result').html('<div class="alert alert-warning">Please enter a book name.</div>');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
