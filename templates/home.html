@@ -10,7 +10,9 @@
             background: rgba(0, 0, 0, 0.4) url('static/background.jpg') no-repeat center center fixed;
             background-size: cover;
             background-blend-mode: overlay;
-            color: #fff; /* Set default text color to white for readability */
+            color: #fff; /* Default text color */
+            margin: 0;
+            padding-bottom: 80px; /* Ensure space for footer content */
         }
 
         .container {
@@ -18,20 +20,18 @@
         }
 
         h1 {
-            color: white; /* Set the header text color to white */
+            color: white; /* Header text color */
         }
-        h3 {
-            color: black;
+        h3, p {
+            color: black; /* Text color for result */
         }
-        p {
-            color: black;
-        }
+
         .result {
             margin-top: 30px;
-            background-color: white; /* Set a white background for the result box */
+            background-color: white;
             padding: 20px;
-            border-radius: 8px; /* Rounded corners */
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Subtle shadow for a nice effect */
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             color: black;
         }
 
@@ -50,6 +50,27 @@
 
         .sentiment-summary li {
             margin-bottom: 10px;
+        }
+
+        .footer {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            background-color: rgba(255, 255, 255, 0.8); /* Transparent white */
+            color: black; /* Set the text color to black for contrast */
+            text-align: center;
+            font-size: 0.9em;
+            padding: 10px 0;
+            box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.2); /* Subtle shadow for the footer */
+        }
+
+        .footer a {
+            color: #00f; /* Link color */
+            text-decoration: none;
+        }
+
+        .footer a:hover {
+            text-decoration: underline;
         }
     </style>
 </head>
@@ -71,6 +92,11 @@
         <div id="result" class="result">
             <!-- Results will be displayed here -->
         </div>
+    </div>
+
+    <div class="footer">
+        <p>Disclaimer: The content displayed is AI-generated based on reviews from Goodreads. Please check for accuracy.</p>
+        <p>Developed by Souvik Sarkar | Feedback and suggestions: <a href="mailto:sarkarsouvik829@gmail.com">sarkarsouvik829@gmail.com</a></p>
     </div>
 
     <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
@@ -96,7 +122,6 @@
                             for (var i = 1; i < sentimentPoints.length; i++) {
                                 if (sentimentPoints[i].trim() !== "") {
                                     sentimentHtml += '<li>' + sentimentPoints[i].trim() + '</li>';
-                                    
                                 }
                             }
 
