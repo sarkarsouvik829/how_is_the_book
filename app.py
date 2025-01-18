@@ -2,11 +2,11 @@ from flask import Flask, request, jsonify, render_template
 import requests
 from bs4 import BeautifulSoup
 from langchain_groq import ChatGroq
-import json
+import json, os
 
 app = Flask(__name__)
 # Initialize Groq LLM
-llm = ChatGroq(groq_api_key="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", model="llama3-8b-8192")
+llm = ChatGroq(groq_api_key=os.getenv['GROQ_API_KEY'], model="llama3-8b-8192")
 
 def fetch_goodreads_html(book_name):
     search_url = f"https://www.goodreads.com/search?q={book_name.replace(' ', '+')}"
