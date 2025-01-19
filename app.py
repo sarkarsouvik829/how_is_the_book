@@ -180,6 +180,7 @@ def book_summary():
             "num_pages": goodreads_response['num_pages'],
             "total_reviews": goodreads_response['total_reviews'],
             "average_rating": goodreads_response['average_rating'],
+            "reviews": goodreads_response['reviews'],
             "goodreads_link": goodreads_url,
             "amazon_link": amazon_url,  # Placeholder Amazon link
             "sentiment_analysis_summary": sentiment_summary

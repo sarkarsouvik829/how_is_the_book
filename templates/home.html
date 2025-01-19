@@ -4,26 +4,38 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>How is the Book?</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <style>
         body {
+            font-family: 'Poppins', sans-serif;
             background: rgba(0, 0, 0, 0.4) url('static/background.jpg') no-repeat center center fixed;
             background-size: cover;
             background-blend-mode: overlay;
-            color: #fff; /* Default text color */
+            color: #fff;
             margin: 0;
-            padding-bottom: 80px; /* Ensure space for footer content */
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
         }
 
         .container {
+            flex: 1;
             margin-top: 50px;
+            padding: 30px;
+            background-color: rgba(255, 255, 255, 0.7);
+            border-radius: 8px;
         }
 
         h1 {
-            color: white; /* Header text color */
+            color: #333;
+            font-weight: 600;
+            text-align: center;
         }
+
         h3, p {
-            color: black; /* Text color for result */
+            color: #333;
         }
 
         .result {
@@ -35,62 +47,116 @@
             color: black;
         }
 
-        .sentiment-summary {
+        .reviews-section {
             margin-top: 20px;
+            display: none;
+            background-color: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
 
-        .sentiment-summary h5 {
-            font-weight: bold;
-            color: black;
-        }
-
-        .sentiment-summary ul {
-            padding-left: 20px;
-        }
-
-        .sentiment-summary li {
+        .reviews-section p {
+            color: rgb(4, 4, 14);
             margin-bottom: 10px;
         }
 
+        .btn-primary {
+            background-color: #2570e7;
+            color: white;
+            border: none;
+            cursor: pointer;
+            padding: 12px 24px;
+            font-size: 1.1rem;
+            border-radius: 5px;
+            transition: background-color 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            background-color: #0056b3;
+        }
+
+        #toggle-reviews {
+            background-color: #2570e7;
+            color: white;
+            border: none;
+            cursor: pointer;
+            padding: 12px 24px;
+            font-size: 1.1rem;
+            border-radius: 5px;
+            margin-top: 20px;
+            display: none;
+            transition: background-color 0.3s ease;
+        }
+
+        #toggle-reviews:hover {
+            background-color: #0056b3;
+        }
+
         .footer {
-            position: fixed;
-            bottom: 0;
-            width: 100%;
-            background-color: rgba(255, 255, 255, 0.8); /* Transparent white */
-            color: black; /* Set the text color to black for contrast */
+            background-color: rgba(255, 255, 255, 0.8);
+            color: black;
             text-align: center;
             font-size: 0.9em;
             padding: 10px 0;
-            box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.2); /* Subtle shadow for the footer */
+            box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.2);
+            margin-top: auto;
         }
 
         .footer a {
-            color: #00f; /* Link color */
+            color: #00f;
             text-decoration: none;
         }
 
         .footer a:hover {
             text-decoration: underline;
         }
+
+        #loading-message {
+            font-size: 1.1rem;
+            font-weight: 500;
+            color: #2570e7;
+            display: none;
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        label[for="book_name"] {
+            color: black;
+        }
+        /* Added styles for smooth loading transition */
+        #loading-message {
+            animation: fadeIn 1s ease-out forwards;
+        }
+
+        @keyframes fadeIn {
+            0% { opacity: 0; }
+            100% { opacity: 1; }
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1 class="text-center">How is the Book?</h1>
+        <h1>How is the Book?</h1>
         <form id="book-form">
             <div class="form-group">
                 <label for="book_name">Enter Book Name:</label>
-                <input type="text" class="form-control" id="book_name" name="book_name" placeholder="Enter book name" required>
+                <input type="text" class="form-control" id="book_name" name="book_name" placeholder="Atomic Habits" required>
             </div>
             <button type="submit" class="btn btn-primary">Get Readers' Sentiment</button>
         </form>
 
-        <div id="loading-message" class="loading" style="display:none;">
+        <div id="loading-message" class="loading">
             AI bots in action...
         </div>
 
         <div id="result" class="result">
             <!-- Results will be displayed here -->
+        </div>
+
+        <button id="toggle-reviews" class="btn btn-primary">Read most voted reviews</button>
+        <div id="reviews-section" class="reviews-section">
+            <!-- Reviews will be dynamically added here -->
         </div>
     </div>
 
@@ -102,6 +168,7 @@
     <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
     <script>
         $(document).ready(function() {
+            // Handle form submission
             $('#book-form').submit(function(event) {
                 event.preventDefault();
                 
@@ -139,6 +206,18 @@
                                 <p><strong>Amazon Link:</strong> <a href="${response.amazon_link}" target="_blank">${response.amazon_link}</a></p>
                                 ${sentimentHtml}
                             `);
+
+                            // Populate reviews
+                            if (response.reviews && response.reviews.length > 0) {
+                                $('#reviews-section').empty();
+                                response.reviews.forEach(function(review) {
+                                    $('#reviews-section').append(`<p>&#8226; ${review}</p>`);
+                                });
+                                $('#toggle-reviews').show();
+                            } else {
+                                $('#toggle-reviews').hide();
+                            }
+
                         }
                     }).fail(function() {
                         $('#result').html('<div class="alert alert-danger">An error occurred. Please try again.</div>');
@@ -146,6 +225,16 @@
                 } else {
                     $('#result').html('<div class="alert alert-warning">Please enter a book name.</div>');
                 }
+            });
+
+            // Toggle reviews section
+            $('#toggle-reviews').click(function() {
+                $('#reviews-section').slideToggle(function() {
+                    // Update the button text based on the reviews section visibility
+                    $(this).is(':visible') ? 
+                        $('#toggle-reviews').text('Hide reviews') : 
+                        $('#toggle-reviews').text('Read most voted reviews');
+                });
             });
         });
     </script>
