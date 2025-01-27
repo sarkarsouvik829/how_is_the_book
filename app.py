@@ -125,29 +125,28 @@ def analyze_reviews_with_groq(reviews, average_rating):
     prompt = (
     f"The book has an average rating of {average_rating} stars. "
     "Analyze the following reviews and summarize the sentiment as Positive, Neutral, or Negative. "
-    "Then, provide a numbered list of the top 8 key points mentioned in the reviews. "
-    "Ensure the key points are distinct, clear, and easy to read, with a new line after each point. "
+    "Then, provide in 60 to 70 words a numbered list of key points based on the following categories:\n\n"
+    "1. What Makes It Stand Out: Highlight the unique or noteworthy aspects of the book, such as its style, themes, or innovations.\n"
+    "2. Why You Might Not Like It: Mention potential drawbacks, criticisms, or challenges readers faced while reading.\n"
+    "3. Best Audience for This Book: Specify the ideal readers, such as genre enthusiasts, professionals, or casual readers.\n"
+    "4. Emotional Impact or Takeaways: Summarize the feelings the book evokes or the lessons readers might learn.\n"
+    "5. Additional Insights (Bonus): Include anything interesting that doesn't fit the above categories but is worth mentioning.\n\n"
     "Use the following format:\n\n"
     "Overall Sentiment: {sentiment}\n\n"
-    "Key Points from the reviews:\n"
-    "1. [First key point]\n"
-    "2. [Second key point]\n"
-    "3. [Third key point]\n"
-    "4. [Fourth key point]\n"
-    "5. [Fifth key point]\n"
-    "\n"
-    "Make sure the points are numbered, concise, and relevant to the book's content. "
-    "Avoid any unnecessary repetition."
+    "1. What Makes It Stand Out: [Point summarizing unique aspects]\n"
+    "2. Why You Might Not Like It: [Point summarizing criticisms]\n"
+    "3. Best Audience for This Book: [Point identifying ideal readers]\n"
+    "4. Emotional Impact or Takeaways: [Point summarizing emotional impact or lessons]\n"
+    "5. Additional Insights: [Point summarizing any other key details]\n\n"
+    "Ensure the points are distinct, concise, and easy to read. Avoid repetition or irrelevant information. "
     "Here is a sample review:\n\n"
     "Overall Sentiment: Highly positive\n\n"
-    "Key Points from the reviews:\n"
-    "1. The book is a fascinating analysis of human thinking and decision-making, written by a Nobel Prize-winning economist.\n"
-    "2. The author explains how our brains function and how our intuitive impressions influence our thoughts and behavior. \n"
-    "3. The book provides many interesting and surprising insights into human psychology and decision-making, such as the importance of understanding statistics, the role of luck in success, and the dangers of relying on intuition rather than formulas.\n"
-    "4. Some reviewers found the book to be too dense and technical, with too much repetition and not enough summarization of key points. \n"
-    "5. Despite some criticisms, many reviewers found the book to be engaging and thought-provoking\n"
-    "\n"
-    "\n\n" + "\n\n".join(reviews)
+    "1. What Makes It Stand Out: The book is a fascinating analysis of human thinking and decision-making, written by a Nobel Prize-winning economist.\n"
+    "2. Why You Might Not Like It: Some reviewers found the book to be too dense and technical, with too much repetition.\n"
+    "3. Best Audience for This Book: Ideal for those interested in psychology, decision-making, and behavioral economics.\n"
+    "4. Emotional Impact or Takeaways: Provides thought-provoking insights and a better understanding of human behavior.\n"
+    "5. Additional Insights: The book emphasizes the importance of understanding statistics and the role of luck in success.\n\n"
+    + "\n\n".join(reviews)
 )
 
     try:
@@ -191,4 +190,4 @@ def book_summary():
         return jsonify({"error": str(e)}), 500
 
 if __name__ == "__main__":
-    app.run(host='0.0.0.0', port='4000', debug=True)
+    app.run(debug=True)
