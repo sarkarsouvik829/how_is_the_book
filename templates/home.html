@@ -112,6 +112,11 @@
             text-decoration: underline;
         }
 
+        ::placeholder {
+            color: grey;
+            opacity: 1; /* Firefox */
+        }
+
         #loading-message {
             font-size: 1.1rem;
             font-weight: 500;
@@ -124,6 +129,7 @@
         label[for="book_name"] {
             color: black;
         }
+
         /* Added styles for smooth loading transition */
         #loading-message {
             animation: fadeIn 1s ease-out forwards;
@@ -168,13 +174,21 @@
     <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
     <script>
         $(document).ready(function() {
-            // Handle form submission
+            function removeDuplicates(arr) {
+                const seen = new Set();
+                return arr.filter(item => {
+                    const normalized = item.replace(/^\d+\.\s*/, '').trim();
+                    if (seen.has(normalized)) return false;
+                    seen.add(normalized);
+                    return true;
+                });
+            }
+
             $('#book-form').submit(function(event) {
                 event.preventDefault();
-                
+
                 var bookName = $('#book_name').val().trim();
                 if (bookName) {
-                    // Show loading message
                     $('#loading-message').show();
                     $('#result').empty();
                     $.get('/book_summary', { book_name: bookName }, function(response) {
@@ -184,16 +198,41 @@
                         } else {
                             var sentimentSummary = response.sentiment_analysis_summary;
                             var sentimentPoints = sentimentSummary.split('\n');
-                            var sentimentHtml = '<h4>Sentiment Analysis:</h4><div class="sentiment-summary"><h5>Overall Sentiment:</h5><p>' + sentimentPoints[0] + '</p><h5>Key Points from the reviews:</h5><ul>';
-                            
+
+                            sentimentPoints = removeDuplicates(sentimentPoints);
+                            var sentimentVerdict = sentimentPoints[0].split(':')[1]; // Extract the overall sentiment
+                            var sentimentHtml = '<h4>Sentiment Analysis:</h4><div class="sentiment-summary"><h5>Overall Sentiment:  </h5><p>' + sentimentVerdict + '</p><h5>Key Points from the reviews:</h5><ul>';
+                            // Normalize the sentimentVerdict string
+                            var normalizedSentiment = sentimentVerdict.trim().toLowerCase();
+
+                            var sentimentColor = '';
+                            if (normalizedSentiment === 'negative') {
+                                sentimentColor = 'red';
+                            } else if (normalizedSentiment === 'neutral') {
+                                sentimentColor = 'orange';
+                            } else {
+                                sentimentColor = 'green'; // Assume it's positive or other non-negative sentiment
+                            }
+
+                            var sentimentHtml = `
+                                <h4>Sentiment Analysis:</h4>
+                                <div class="sentiment-summary">
+                                    <h5>Overall Sentiment: <span style="color: ${sentimentColor};">${sentimentVerdict}</span></h5><br>
+                                    <h5>Key Points from the reviews:</h5>
+                                    <ul>`;
+
                             for (var i = 1; i < sentimentPoints.length; i++) {
                                 if (sentimentPoints[i].trim() !== "") {
-                                    sentimentHtml += '<li>' + sentimentPoints[i].trim() + '</li>';
+                                    let parts = sentimentPoints[i].replace(/^\d+\.\s*/, '').split(':'); // Remove numbers at the start
+                                    let heading = parts[0] ? `<strong>${parts[0]}</strong>` : '';
+                                    let body = parts[1] ? parts[1] : '';
+                                    sentimentHtml += `<li>${heading}${body}</li>`;
                                 }
                             }
 
+
                             sentimentHtml += '</ul></div>';
-                            
+
                             $('#result').html(`
                                 <h3>Is this your book?</h3>
                                 <p><strong>Title:</strong> ${response.book_title}</p>
@@ -207,7 +246,6 @@
                                 ${sentimentHtml}
                             `);
 
-                            // Populate reviews
                             if (response.reviews && response.reviews.length > 0) {
                                 $('#reviews-section').empty();
                                 response.reviews.forEach(function(review) {
@@ -217,7 +255,6 @@
                             } else {
                                 $('#toggle-reviews').hide();
                             }
-
                         }
                     }).fail(function() {
                         $('#result').html('<div class="alert alert-danger">An error occurred. Please try again.</div>');
@@ -227,10 +264,8 @@
                 }
             });
 
-            // Toggle reviews section
             $('#toggle-reviews').click(function() {
                 $('#reviews-section').slideToggle(function() {
-                    // Update the button text based on the reviews section visibility
                     $(this).is(':visible') ? 
                         $('#toggle-reviews').text('Hide reviews') : 
                         $('#toggle-reviews').text('Read most voted reviews');
