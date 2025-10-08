@@ -6,7 +6,7 @@ import json, os
 
 app = Flask(__name__)
 # Initialize Groq LLM
-llm = ChatGroq(groq_api_key=os.getenv('GROQ_API_KEY'), model="llama3-8b-8192")
+llm = ChatGroq(groq_api_key=os.getenv('GROQ_API_KEY'), model="llama-3.1-8b-instant")
 
 def fetch_goodreads_html(book_name):
     search_url = f"https://www.goodreads.com/search?q={book_name.replace(' ', '+')}"
@@ -191,3 +191,4 @@ def book_summary():
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port='4000', debug=True)
+
